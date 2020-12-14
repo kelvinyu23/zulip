@@ -491,11 +491,22 @@ exports.toggle_actions_popover = function (element, id) {
             editability_menu_item = i18n.t("View source");
         }
         const topic = message.topic;
+        let topic_string_mute;
+        let topic_string_unmute;
+
+        if (message_viewport.is_narrow()) {
+            topic_string_mute = i18n.t("Mute this topic");
+            topic_string_unmute = i18n.t("Unmute this topic");
+        } else {
+            topic_string_mute = i18n.t("Mute the topic <strong>__topic__</strong>",
+                                       {topic: topic});
+            topic_string_unmute = i18n.t("Unmute the topic <strong>__topic__</strong>",
+                                         {topic: topic});
+        }
         const can_mute_topic =
             message.stream && topic && !muting.is_topic_muted(message.stream_id, topic);
         const can_unmute_topic =
             message.stream && topic && muting.is_topic_muted(message.stream_id, topic);
-
         const should_display_edit_history_option =
             message.edit_history &&
             message.edit_history.some(
@@ -504,7 +515,6 @@ exports.toggle_actions_popover = function (element, id) {
                     util.get_edit_event_prev_topic(entry) !== undefined,
             ) &&
             page_params.realm_allow_edit_history;
-
         // Disabling this for /me messages is a temporary workaround
         // for the fact that we don't have a styling for how that
         // should look.  See also condense.js.
@@ -532,6 +542,8 @@ exports.toggle_actions_popover = function (element, id) {
             topic,
             use_edit_icon,
             editability_menu_item,
+            topic_string_mute: topic_string_mute,
+            topic_string_unmute: topic_string_unmute,
             can_mute_topic,
             can_unmute_topic,
             should_display_collapse,
@@ -555,6 +567,9 @@ exports.toggle_actions_popover = function (element, id) {
             html: true,
             trigger: "manual",
         });
+if (message_viewport.width() <= 320) {
+            elt.data('popover').options.template = render_no_arrow_popover({class: "message-info-popover"});
+        }
         elt.popover("show");
         current_actions_popover_elem = elt;
     }
